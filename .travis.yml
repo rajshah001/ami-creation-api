@@ -31,6 +31,8 @@ install:
   - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
   - export TRAVIS_BUILD_DIR=${TRAVIS_BUILD_DIR}
   - bash aws-setup.sh
+  - export PACKAGES=${PACKAGES}
+  - export AMI_NAME=${AMI_NAME}
 
 jobs:
   include:
