@@ -5,6 +5,7 @@ env:
     - AWS_DEFAULT_REGION=ap-southeast-2
     - ACCOUNT_ID=047365995724
     - PROVIDER=aws
+    - PACKER_PAYLOAD={"packages":["nginx-playbook"], "ami_name":"Test-AMI"}
 
 install:
   - echo "Install AWSCLI v2"
