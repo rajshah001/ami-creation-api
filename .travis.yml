@@ -25,7 +25,7 @@ install:
   - sudo apt-get install ansible -y
   - ansible --version
   - echo "Make Shell Scripts Executable"
-  - chmod +x ./generate-packer-script.sh ./assume_role.sh ./aws-setup.sh
+  - chmod +x ./generate-packer-script.sh ./assume_role.sh ./aws-setup.sh ./temp.sh
   - echo "Export Creds for default AWS Setup"
   - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
   - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -44,6 +44,7 @@ jobs:
       - echo "Generating Packer Script with selected Provisioners"
       - rm -rf ${TRAVIS_BUILD_DIR}/builds
       - ls -al
+      - bash temp.sh
       - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
       - cat ${TRAVIS_BUILD_DIR}/tempfile.json
       - ls -al
