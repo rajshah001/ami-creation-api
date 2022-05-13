@@ -40,8 +40,12 @@ jobs:
       if: (branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request))
       script:
       - echo "Generating Packer Script with selected Provisioners"
+      - rm -rf ${TRAVIS_BUILD_DIR}/builds
+      - ls -al
       - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
       - cat ${TRAVIS_BUILD_DIR}/tempfile.json
+      - ls -al
       - bash assume_role.sh arn:aws:iam::${ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
       - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
+      - ls -al
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr
