@@ -39,7 +39,8 @@ jobs:
     - stage: Deploy
       if: (branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request))
       script:
-      - echo {"data":{"packages":${PACKAGES},"ami_name":${AMI_NAME}}}
+      - echo ${PACKAGES}
+      - echo ${AMI_NAME}
       - echo "Generating Packer Script with selected Provisioners"
       - rm -rf ${TRAVIS_BUILD_DIR}/builds
       - ls -al
