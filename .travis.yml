@@ -45,7 +45,7 @@ jobs:
     - stage: Deploy
       if: (branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request))
       script:
-      - bash decrypter.sh
+      - source decrypter.sh
       - echo "Generating Packer Script with selected Provisioners"
       - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
       - cat ${TRAVIS_BUILD_DIR}/tempfile.json
