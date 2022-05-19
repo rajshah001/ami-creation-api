@@ -35,6 +35,9 @@ install:
   - export AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
   - export AZURE_TENANT_ID=${AZURE_TENANT_ID}
   - export AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+  - echo "Export Creds for default GCP Setup"
+  - export GCP_PROJECT_ID=${GCP_PROJECT_ID}
+  - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
   - bash aws-setup.sh
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
