@@ -37,7 +37,7 @@ echo "${PROVIDER}"
 # Create JSON object to make request
 generate_post_data()
 {
-  cat <<EOF
+cat <<EOF
 {
   "data":{
     "packages": ${PACKAGES},

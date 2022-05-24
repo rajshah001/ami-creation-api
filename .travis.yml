@@ -12,6 +12,8 @@ install:
   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   - unzip awscliv2.zip
   - sudo ./aws/install
+  - echo "Install Azure CLI"
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   - echo "Install Packer"
   - curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
   - sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -35,6 +37,7 @@ install:
   - export AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
   - export AZURE_TENANT_ID=${AZURE_TENANT_ID}
   - export AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+  - export AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP}
   - echo "Export Creds for default GCP Setup"
   - export GCP_PROJECT_ID=${GCP_PROJECT_ID}
   - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
@@ -42,16 +45,35 @@ install:
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
+  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
 
 jobs:
   include:
-    - stage: Deploy
+    - stage: Deploy AMI
       if: (branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request))
       script:
       - source decrypter.sh
       - echo "Generating Packer Script with selected Provisioners"
       - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
       - cat ${TRAVIS_BUILD_DIR}/tempfile.json
-      - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
       - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
-      - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr
+      - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
+    
+    - stage: Deploy VM in AWS
+      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=aws)
+      script:
+      - export AMI_ID=`tail -2 output.txt | head -2 | awk "match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }"`
+      - aws ec2 run-instances --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
+
+    - stage: Deploy VM in Azure
+      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=azure)
+      script:
+      - az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
+      - az vm create --resource-group ${AZURE_RESOURCE_GROUP} --name ${AMI_NAME} --image ${AMI_NAME} --generate-ssh-keys
+    
+    - stage: Deploy VM in GCP
+      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=gcp)
+      script:
+      - gcloud auth activate-service-account --key-file ${TRAVIS_BUILD_DIR}/gcp-sa-keys/key.json
+      - gcloud config set project ${GCP_PROJECT_ID}
+      - gcloud compute instances create ${AMI_NAME} --project=${GCP_PROJECT_ID} --zone=us-central1-a --image=${AMI_NAME
