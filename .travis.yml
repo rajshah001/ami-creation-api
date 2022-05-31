@@ -60,20 +60,20 @@ jobs:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
     
     - stage: Deploy VM in AWS
-      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=aws)
+      if: (PROVIDER=aws)
       script:
       - export AMI_ID=`tail -2 output.txt | head -2 | awk "match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }"`
       - aws ec2 run-instances --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
     - stage: Deploy VM in Azure
-      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=azure)
+      if: (PROVIDER=azure)
       script:
       - az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
       - az vm create --resource-group ${AZURE_RESOURCE_GROUP} --name ${AMI_NAME} --image ${AMI_NAME} --generate-ssh-keys
     
     - stage: Deploy VM in GCP
-      if: ((branch IN (master) AND type != pull_request) OR (branch NOT IN (master) AND type NOT IN (push, pull_request)) AND PROVIDER=gcp)
+      if: (PROVIDER=gcp)
       script:
       - gcloud auth activate-service-account --key-file ${TRAVIS_BUILD_DIR}/gcp-sa-keys/key.json
       - gcloud config set project ${GCP_PROJECT_ID}
-      - gcloud compute instances create ${AMI_NAME} --project=${GCP_PROJECT_ID} --zone=us-central1-a --image=${AMI_NAME
+      - gcloud compute instances create ${AMI_NAME} --project=${GCP_PROJECT_ID} --zone=us-central1-a --image=${AMI_NAME}
