@@ -6,6 +6,7 @@ env:
     - PROVIDER=aws
     - PACKAGES='["nginx-playbook"]'
     - AMI_NAME=automated-ami
+    - APP_AWS_ACCOUNT_ID=047365995724
 
 install:
   - echo "Install AWSCLI v2"
@@ -45,7 +46,7 @@ install:
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
-  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
+  - bash assume_role.sh arn:aws:iam::${APP_AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
 
 jobs:
   include:
@@ -63,7 +64,7 @@ jobs:
       if: (PROVIDER=aws)
       script:
       - export AMI_ID=`tail -2 output.txt | head -2 | awk "match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }"`
-      - aws ec2 run-instances --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
+      - aws ec2 run-instances --profile ${PROVIDER} --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
     - stage: Deploy VM in Azure
       if: (PROVIDER=azure)
