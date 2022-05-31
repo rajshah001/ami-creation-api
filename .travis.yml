@@ -60,21 +60,21 @@ jobs:
       - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
     
     - stage: Deploy VM in AWS
-      if: (PROVIDER=aws)
+      if: (env(PROVIDER) = aws)
       script:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - export AMI_ID=`tail -2 output.txt | head -2 | awk "match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }"`
       - aws ec2 run-instances --profile ${PROVIDER} --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
     - stage: Deploy VM in Azure
-      if: (PROVIDER=azure)
+      if: (env(PROVIDER) = azure)
       script:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.json 2>&1 | sudo tee output.txt
       - az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
       - az vm create --resource-group ${AZURE_RESOURCE_GROUP} --name ${AMI_NAME} --image ${AMI_NAME} --generate-ssh-keys
     
     - stage: Deploy VM in GCP
-      if: (PROVIDER=gcp)
+      if: (env(PROVIDER) = gcp)
       script:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.json 2>&1 | sudo tee output.txt
       - gcloud auth activate-service-account --key-file ${TRAVIS_BUILD_DIR}/gcp-sa-keys/key.json
