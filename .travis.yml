@@ -55,13 +55,14 @@ install:
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
   - cat ${TRAVIS_BUILD_DIR}/tempfile.json
-  - aws s3 sync s3://ami-creation-automation .
+  - aws s3 sync --profile default s3://ami-creation-automation .
   - sudo apt install jq
 jobs:
   include:
     - stage: Deploy VM in AWS
       if: (branch IN (master) AND type NOT IN (push, pull_request) AND (env(PROVIDER) = aws))
       script:
+      - aws ec2 describe-images --profile ${PROVIDER} --region ap-southeast-2 --image-ids ami-02c87d83e1a7c3206
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - cat ${TRAVIS_BUILD_DIR}/manifest.json
       - export AMI_ID=`cat ${TRAVIS_BUILD_DIR}/manifest.json | jq '.builds[0].artifact_id' | tr -d '"' | awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }'`
