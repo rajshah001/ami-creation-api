@@ -61,6 +61,8 @@ jobs:
       script:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - cat ${TRAVIS_BUILD_DIR}/output.txt
+      - ls -al
+      - cat ${TRAVIS_BUILD_DIR}/manifest.json
       - export AMI_ID=`tail -2 output.txt | head -2 | awk "match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }"`
       - aws ec2 run-instances --profile ${PROVIDER} --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
