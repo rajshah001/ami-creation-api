@@ -6,7 +6,6 @@ env:
     - PROVIDER=aws
     - PACKAGES='["nginx-playbook"]'
     - AMI_NAME=automated-ami
-    - AWS_ACCOUNT_ID=047365995724
 
 install:
   - echo "Install AWSCLI v2"
@@ -48,7 +47,7 @@ install:
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
   - source decrypter.sh
-  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
+  - bash assume_role.sh arn:aws:iam::${NEW_AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
