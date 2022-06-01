@@ -46,15 +46,17 @@ install:
   - export GCP_PROJECT_ID=${GCP_PROJECT_ID}
   - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
   - bash aws-setup.sh
+  - ls -al
+  - cat ${TRAVIS_BUILD_DIR}/.aws/credentials
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
-  - source decrypter.sh
   - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
+  - source decrypter.sh
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
-  - cat ${TRAVIS_BUILD_DIR}/tempfile.json
+  # - cat ${TRAVIS_BUILD_DIR}/tempfile.json
   - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
   - sudo apt install jq
 jobs:
