@@ -46,9 +46,9 @@ install:
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
+  - source decrypter.sh
   - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
-  - source decrypter.sh
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
   - cat ${TRAVIS_BUILD_DIR}/tempfile.json
