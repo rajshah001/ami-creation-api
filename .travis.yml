@@ -50,12 +50,12 @@ install:
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
   - source decrypter.sh
-  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
+  - bash assume_role.sh arn:aws:iam::${NEW_AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
   - cat ${TRAVIS_BUILD_DIR}/tempfile.json
-  - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
+  - aws s3 sync s3://ami-creation-automation .
   - sudo apt install jq
 jobs:
   include:
