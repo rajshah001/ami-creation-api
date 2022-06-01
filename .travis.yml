@@ -13,7 +13,7 @@ install:
   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   - unzip awscliv2.zip
   - sudo ./aws/install
-  - aws s3 ls --region ap-south-1
+  # - aws s3 ls --region ap-south-1
   - echo "Install Azure CLI"
   - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   - echo "Install Packer"
