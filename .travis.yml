@@ -9,6 +9,7 @@ env:
     - AWS_ACCOUNT_ID=047365995724
 
 install:
+  - aws s3 ls --region ap-south-1
   - echo "Install AWSCLI v2"
   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   - unzip awscliv2.zip
