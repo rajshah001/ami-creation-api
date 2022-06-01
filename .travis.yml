@@ -47,7 +47,7 @@ install:
   - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
   - bash aws-setup.sh
   - ls -al
-  - cat ${TRAVIS_BUILD_DIR}/.aws/credentials
+  - cat ~/.aws/credentials
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
