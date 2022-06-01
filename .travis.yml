@@ -45,10 +45,10 @@ install:
   - echo "Export Creds for default GCP Setup"
   - export GCP_PROJECT_ID=${GCP_PROJECT_ID}
   - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
+  - bash aws-setup.sh
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
-  - bash aws-setup.sh
   - source decrypter.sh
   - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
@@ -62,7 +62,6 @@ jobs:
     - stage: Deploy VM in AWS
       if: (branch IN (master) AND type NOT IN (push, pull_request) AND (env(PROVIDER) = aws))
       script:
-      # - aws ec2 describe-images --profile ${PROVIDER} --region ap-southeast-2 --image-ids ami-02c87d83e1a7c3206
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - cat ${TRAVIS_BUILD_DIR}/manifest.json
       - export AMI_ID=`cat ${TRAVIS_BUILD_DIR}/manifest.json | jq '.builds[0].artifact_id' | tr -d '"' | awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }'`
