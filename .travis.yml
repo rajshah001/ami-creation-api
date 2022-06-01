@@ -48,14 +48,14 @@ install:
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
-  - source decrypter.sh
   - bash aws-setup.sh
-  # - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
+  - source decrypter.sh
+  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
   - cat ${TRAVIS_BUILD_DIR}/tempfile.json
-  - aws s3 sync --profile default s3://ami-creation-automation .
+  - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
   - sudo apt install jq
 jobs:
   include:
@@ -66,7 +66,7 @@ jobs:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - cat ${TRAVIS_BUILD_DIR}/manifest.json
       - export AMI_ID=`cat ${TRAVIS_BUILD_DIR}/manifest.json | jq '.builds[0].artifact_id' | tr -d '"' | awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }'`
-      - aws ec2 run-instances --profile ${PROVIDER} --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
+      - aws ec2 run-instances --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
     - stage: Deploy VM in Azure
       if: (branch IN (master) AND type NOT IN (push, pull_request) AND (env(PROVIDER) = azure))
