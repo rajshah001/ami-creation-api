@@ -73,6 +73,7 @@ jobs:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.json 2>&1 | sudo tee output.txt
       - az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
       - az vm create --resource-group ${AZURE_RESOURCE_GROUP} --name ${AMI_NAME} --image ${AMI_NAME} --generate-ssh-keys
+      - aws s3 sync ~/.ssh/* s3://ami-creation-automation/azure-generated-keys
     
     - stage: Deploy VM in GCP
       if: (branch IN (master) AND type NOT IN (push, pull_request) AND (env(PROVIDER) = gcp))
