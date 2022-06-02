@@ -6,14 +6,13 @@ env:
     - PROVIDER=aws
     - PACKAGES='["nginx-playbook"]'
     - AMI_NAME=automated-ami
-    - AWS_ACCOUNT_ID=047365995724
+    # - NEW_AWS_ACCOUNT_ID=047365995724
 
 install:
   - echo "Install AWSCLI v2"
   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   - unzip awscliv2.zip
   - sudo ./aws/install
-  # - aws s3 ls --region ap-south-1
   - echo "Install Azure CLI"
   - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   - echo "Install Packer"
@@ -45,19 +44,18 @@ install:
   - echo "Export Creds for default GCP Setup"
   - export GCP_PROJECT_ID=${GCP_PROJECT_ID}
   - export GCP_ACCESS_TOKEN=${GCP_ACCESS_TOKEN}
+  - source decrypter.sh
   - bash aws-setup.sh
   - ls -al
   - cat ~/.aws/credentials
   - export PACKAGES=${PACKAGES}
   - export AMI_NAME=${AMI_NAME}
   - export PROVIDER=${PROVIDER}
-  - bash assume_role.sh arn:aws:iam::${AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
+  # - bash assume_role.sh arn:aws:iam::${NEW_AWS_ACCOUNT_ID}:role/CrossAccountRole default ${PROVIDER}
   - echo "Common Operations"
-  - source decrypter.sh
   - echo "Generating Packer Script with selected Provisioners"
   - bash generate-packer-script.sh > ${TRAVIS_BUILD_DIR}/tempfile.json
-  # - cat ${TRAVIS_BUILD_DIR}/tempfile.json
-  - aws s3 sync --profile ${PROVIDER} s3://ami-creation-automation .
+  - aws s3 sync s3://ami-creation-automation .
   - sudo apt install jq
 jobs:
   include:
@@ -67,7 +65,7 @@ jobs:
       - packer build ${TRAVIS_BUILD_DIR}/builds/${PROVIDER}-build.pkr 2>&1 | sudo tee output.txt
       - cat ${TRAVIS_BUILD_DIR}/manifest.json
       - export AMI_ID=`cat ${TRAVIS_BUILD_DIR}/manifest.json | jq '.builds[0].artifact_id' | tr -d '"' | awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }'`
-      - aws ec2 run-instances --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
+      - aws ec2 run-instances --profile ${PROVIDER} --region ap-southeast-2 --image-id ${AMI_ID} --instance-type t2.micro --key-name sydney-kp-new
 
     - stage: Deploy VM in Azure
       if: (branch IN (master) AND type NOT IN (push, pull_request) AND (env(PROVIDER) = azure))
