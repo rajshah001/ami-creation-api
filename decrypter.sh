@@ -9,4 +9,3 @@ export NEW_AWS_SECRET_ACCESS_KEY=`echo ${NEW_AWS_SECRET_ACCESS_KEY} | rev | base
 export NEW_AWS_ACCOUNT_ID=`echo ${NEW_AWS_ACCOUNT_ID} | rev | base64 -di`
 
 export GCP_PROJECT_ID=`echo ${GCP_PROJECT_ID} | rev | base64 -di`
-export GCP_ACCESS_TOKEN=`echo ${GCP_ACCESS_TOKEN} | rev | base64 -di`
